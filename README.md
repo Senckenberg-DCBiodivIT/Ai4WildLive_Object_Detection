@@ -80,7 +80,6 @@ def map_result(self, raw: object) -> list[dict]:
 ## Step 4 — Add your dependencies to `requirements.txt`
 
 List the Python packages your model needs (e.g. PyTorch, ONNX Runtime, TensorFlow).
-Do not include common packages like `pillow` or `requests` — those are already installed.
 
 ```
 # Example for a PyTorch model:
