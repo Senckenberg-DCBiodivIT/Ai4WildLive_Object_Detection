@@ -127,7 +127,7 @@ This checks everything end-to-end and validates that your output format is corre
 
 When everything passes you will see:
 ```
-  ✓  Your model is ready to be submitted.
+   Your model is ready to be submitted.
 ```
 
 ---
