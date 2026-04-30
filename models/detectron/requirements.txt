@@ -1,0 +1,5 @@
+torch>=2.0.0
+torchvision
+pillow
+# detectron2 must be built from source for Python 3.10+
+git+https://github.com/facebookresearch/detectron2.git

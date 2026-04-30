@@ -1,0 +1,6 @@
+# Add your model's dependencies here
+# Example:
+# torch==2.0.0
+# torchvision==0.15.0
+# onnxruntime==1.16.0
+# pillow
