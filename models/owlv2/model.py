@@ -13,7 +13,7 @@ from __future__ import annotations
 import os
 # Keep HF fast tokenizer safe with multiprocessing workers.
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-os.environ["HF_HUB_OFFLINE"] = "1"
+os.environ["HF_HUB_OFFLINE"] = "0", #"1"
 
 import io
 import json
