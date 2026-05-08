@@ -497,7 +497,9 @@ def _resolve_device() -> torch.device:
     return torch.device(requested)
 
 
-class Model(BaseModel):
+class OWLv2ModelHelper:
+    """Owns the OWLv2 model lifecycle, inference, and result mapping."""
+
     def __init__(self) -> None:
         self.model: Owlv2ForObjectDetection | None = None
         self.processor: Owlv2Processor | None = None
@@ -678,6 +680,47 @@ class Model(BaseModel):
                 }
             )
         return mapped
+
+
+class Model(BaseModel):
+    """A service-oriented adapter that preserves the intended model methods."""
+
+    _DELEGATED_ATTRIBUTES = {
+        "model",
+        "processor",
+        "device",
+        "score_threshold",
+        "max_detections",
+        "nms_iou_threshold",
+        "processor_image_size",
+        "class_names",
+        "prompts",
+        "checkpoint_path",
+        "load_info",
+    }
+
+    def __init__(self) -> None:
+        self._helper = OWLv2ModelHelper()
+
+    def __getattr__(self, name: str) -> Any:
+        if name in self._DELEGATED_ATTRIBUTES:
+            return getattr(self._helper, name)
+        raise AttributeError(f"{type(self).__name__!s} object has no attribute {name!r}")
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        if name in self._DELEGATED_ATTRIBUTES and "_helper" in self.__dict__:
+            setattr(self._helper, name, value)
+            return
+        super().__setattr__(name, value)
+
+    def load(self) -> None:
+        self._helper.load()
+
+    def predict(self, image_bytes: bytes) -> dict[str, Any]:
+        return self._helper.predict(image_bytes)
+
+    def map_result(self, raw: object) -> list[dict[str, Any]]:
+        return self._helper.map_result(raw)
 
 
 instance = Model()
