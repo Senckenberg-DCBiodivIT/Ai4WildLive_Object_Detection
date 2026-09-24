@@ -1,23 +1,25 @@
 from __future__ import annotations
 
+import importlib.util
 import io
 import logging
 import os
-import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from detectron2.data.detection_utils import convert_PIL_to_numpy
+from PIL import Image
 
-from models.base import BaseModel  # noqa: E402
+_spec = importlib.util.spec_from_file_location("_base", Path(__file__).parent.parent / "base.py")
+_base = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_base)
+BaseModel = _base.BaseModel
 
 logger = logging.getLogger(__name__)
 
+# The class labels this model can output. Their scientific names are declared
+# in classes.json; the platform resolves each label to its name and the
+# middleware resolves that to a COL id — no ids or vernacular names here.
 THING_CLASSES = ["jaguar", "collared_peccary", "cattle"]
-GBIF_IDS = {
-    "jaguar": "https://www.gbif.org/species/5219426",
-    "collared_peccary": "https://www.gbif.org/species/2440995",
-    "cattle": "https://www.gbif.org/species/2441022",
-}
 
 BASE_DIR = os.path.dirname(__file__)
 
@@ -40,8 +42,6 @@ class Model(BaseModel):
         logger.info("Detectron v1 model loaded")
 
     def predict(self, image_bytes: bytes) -> object:
-        from PIL import Image
-        from detectron2.data.detection_utils import convert_PIL_to_numpy
 
         img_array = convert_PIL_to_numpy(Image.open(io.BytesIO(image_bytes)), "BGR")
         return self._predictor(img_array)
@@ -54,10 +54,16 @@ class Model(BaseModel):
 
         results = []
         for i in range(len(boxes)):
-            class_name = THING_CLASSES[classes[i]]
+            class_idx = int(classes[i])
+            if class_idx >= len(THING_CLASSES):
+                # Model predicted a class index outside our known set — likely a
+                # config/weights mismatch. Skip rather than 500 the request.
+                logger.warning(f"Class index {class_idx} out of range (have {len(THING_CLASSES)} classes) — skipping")
+                continue
+            class_name = THING_CLASSES[class_idx]
             results.append({
+                "class": class_name,
                 "bbox": boxes[i].tolist(),
-                "acceptedNameUsageID": GBIF_IDS.get(class_name, ""),
                 "score": float(scores[i]),
             })
             logger.debug(f"Detected: {class_name} ({scores[i]:.3f})")
