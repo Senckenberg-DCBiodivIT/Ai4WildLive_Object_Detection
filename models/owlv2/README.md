@@ -12,6 +12,7 @@ by the base `template` folder.
 - `*.pt`: LoRA checkpoints. If `OWLV2_CHECKPOINT` is not set, the newest `.pt`
   file in this folder is used automatically.
 - `requirements.txt`: minimal inference dependencies.
+- `.python-version`: Python 3.12; validated locally with Python 3.12.7.
 
 ## Service Usage
 
