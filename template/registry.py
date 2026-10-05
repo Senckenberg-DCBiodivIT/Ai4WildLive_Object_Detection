@@ -1,18 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-
-
-@dataclass
-class ModelConfig:
-    name: str
-    version: str
-    provider: str
-    deployment_type: str
-    endpoint: str
-    description: str | None = None
-    supported_taxa: str | None = None
-    default: bool = False
+from models.config import ModelConfig
 
 
 def get_model() -> ModelConfig:

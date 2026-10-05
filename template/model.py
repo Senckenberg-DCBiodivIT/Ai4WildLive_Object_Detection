@@ -4,23 +4,21 @@ Copy this file to models/<your_model_id>/model.py and implement the three method
 
 from __future__ import annotations
 
-import sys
+import importlib.util
+import json
 from pathlib import Path
 
-# Makes 'from models.base import BaseModel' work when running this file directly
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+_spec = importlib.util.spec_from_file_location("_base", Path(__file__).parent.parent / "base.py")
+_base = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_base)
+BaseModel = _base.BaseModel
 
-from models.base import BaseModel  # noqa: E402
 
-
-# Map your model's class labels to GBIF species URLs
-GBIF_IDS: dict[str, str] = {
-    # "jaguar": "https://www.gbif.org/species/5219426",
-}
-
-CLASS_NAMES: list[str] = [
-    # "jaguar",
-]
+# classes.json maps every label your model can output to its scientific name
+# (or null for non-taxon classes like "vehicle"). The platform resolves that
+# name against the Catalogue of Life for the taxon ID, vernacular name, and
+# higher taxonomy — declare the scientific name only, nothing else.
+CLASSES: dict[str, str | None] = json.loads((Path(__file__).parent / "classes.json").read_text())
 
 SCORE_THRESHOLD: float = 0.5
 
@@ -40,8 +38,8 @@ class Model(BaseModel):
         Convert raw output to the standard format.
 
         Each entry must have:
-            "bbox": [x1, y1, x2, y2]
-            "acceptedNameUsageID": "https://www.gbif.org/species/<id>"
+            "bbox":  [x1, y1, x2, y2]
+            "class": "jaguar"          # must be a key in classes.json
             "score": 0.95
         """
         raise NotImplementedError
