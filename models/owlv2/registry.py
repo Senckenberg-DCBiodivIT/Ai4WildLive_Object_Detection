@@ -1,18 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-
-
-@dataclass
-class ModelConfig:
-    name: str
-    version: str
-    provider: str
-    deployment_type: str
-    endpoint: str
-    description: str | None = None
-    supported_taxa: str | None = None
-    default: bool = False
+from models.config import ModelConfig
 
 
 def get_model() -> ModelConfig:
@@ -21,7 +9,6 @@ def get_model() -> ModelConfig:
         version="1.0",
         provider="THWS AP3 - AI4WildLIVE, contact: simonebianchi@thws.de",
         deployment_type="local",
-        endpoint="models.owlv2.model",
         description=(
             "Fine-tuned OWLv2 open-vocabulary object detector for Bolivia camera-trap imagery. "
             "The model detects and localizes wildlife, humans, vehicles, and field equipment in camera-trap images. "

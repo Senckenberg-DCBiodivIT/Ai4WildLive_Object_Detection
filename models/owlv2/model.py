@@ -2,7 +2,7 @@
 OWLv2 + LoRA adapter for the object-detection-service model template.
 
 The folder is meant to be copied to:
-    object-detection-service/models/template_owlv2/
+    object-detection-service/models/owlv2/
 
 It loads the HF OWLv2 base model, injects the same LoRA structure used during
 fine-tuning, loads the local checkpoint, and returns detections in the standard
@@ -13,7 +13,7 @@ from __future__ import annotations
 import os
 # Keep HF fast tokenizer safe with multiprocessing workers.
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-os.environ["HF_HUB_OFFLINE"] = "0", #"1"
+os.environ.setdefault("HF_HUB_OFFLINE", "0")
 
 import io
 import json
@@ -101,7 +101,6 @@ SCORE_THRESHOLD = _env_float("OWLV2_SCORE_THRESHOLD", 0.50)
 MAX_DETECTIONS = _env_int("OWLV2_MAX_DETECTIONS", 50)
 NMS_IOU_THRESHOLD = _env_float("OWLV2_NMS_IOU_THRESHOLD", 0.50)
 PROCESSOR_IMAGE_SIZE = _env_int("OWLV2_PROCESSOR_IMAGE_SIZE", 0)
-REQUIRE_GBIF_IDS = _env_flag("OWLV2_REQUIRE_GBIF_IDS", False)
 
 
 CLASS_NAMES: list[str] = [
@@ -187,84 +186,6 @@ CLASS_NAMES: list[str] = [
     "brazilian_porcupine",
     "tataupa_tinamou",
 ]
-
-# Doubtful GBIF IDs: vehicle, equipment, something_unidentifiable, amphibian_sp,
-# reptile_sp, reptilia, others, cattle_or_human, some_rat_like_rodent, xenarthra
-
-GBIF_IDS: dict[str, str] = {
-    "human": "https://www.gbif.org/species/2436436",
-    "horse": "https://www.gbif.org/species/2440886",
-    "bare_faced_curassow": "https://www.gbif.org/species/2482174",
-    "nine_banded_armadillo": "https://www.gbif.org/species/2440779",
-    "jaguar": "https://www.gbif.org/species/5219426",
-    "bird_sp": "https://www.gbif.org/species/212",
-    "amazonian_motmot": "https://www.gbif.org/species/2475290",
-    "cattle": "https://www.gbif.org/species/2441022",
-    "central_american_agouti": "https://www.gbif.org/species/2437576",
-    "red_legged_seriema": "https://www.gbif.org/species/5228133",
-    "gray_brocket_deer": "https://www.gbif.org/species/7261375",
-    "argentine_black_and_white_tegu": "https://www.gbif.org/species/5227370",
-    "lowland_paca": "https://www.gbif.org/species/4263039",
-    "collared_peccary": "https://www.gbif.org/species/2440995",
-    "cocoi_heron": "https://www.gbif.org/species/2480951",
-    "boat_billed_heron": "https://www.gbif.org/species/2480833",
-    "sunbittern": "https://www.gbif.org/species/2474332",
-    "insect_sp": "https://www.gbif.org/species/216",
-    "grey_necked_wood_rail": "https://www.gbif.org/species/2474659",
-    "mammal_sp": "https://www.gbif.org/species/359",
-    "ocelot": "https://www.gbif.org/species/2434982",
-    "rusty_margined_guan": "https://www.gbif.org/species/2482204",
-    "bolivian_squirrel": "https://www.gbif.org/species/5219662",
-    "undulated_tinamou": "https://www.gbif.org/species/2477560",
-    "Tapeti": "https://www.gbif.org/species/2436860",
-    "common_opossum": "https://www.gbif.org/species/2439920",
-    "south_american_coati": "https://www.gbif.org/species/2433536",
-    "south_american_tapir": "https://www.gbif.org/species/2440898",
-    "white_lipped_peccary": "https://www.gbif.org/species/2440993",
-    "crab_eating_raccoon": "https://www.gbif.org/species/9518324",
-    "king_vulture": "https://www.gbif.org/species/2481923",
-    "jaguarundi": "https://www.gbif.org/species/2435146",
-    "yellow_armadillo": "https://www.gbif.org/species/2440799",
-    "white_tipped_dove": "https://www.gbif.org/species/2496060",
-    "crab_eating_fox": "https://www.gbif.org/species/2434584",
-    "peccari_sp": "https://www.gbif.org/species/5303",
-    "artiodactyla": "https://www.gbif.org/species/731",
-    "bat_sp": "https://www.gbif.org/species/734",
-    "scaled_pigeon": "https://www.gbif.org/species/2495339",
-    "armadillo_sp": "https://www.gbif.org/species/735",
-    "puma": "https://www.gbif.org/species/2435099",
-    "capped_heron": "https://www.gbif.org/species/2480816",
-    "lesser_yellow_headed_vulture": "https://www.gbif.org/species/2481928",
-    "primates_sp": "https://www.gbif.org/species/798",
-    "plush_crested_jay": "https://www.gbif.org/species/2482575",
-    "tufted_capuchin": "https://www.gbif.org/species/7477334",
-    "capybara": "https://www.gbif.org/species/5786666",
-    "nandu": "https://www.gbif.org/species/2495165",
-    "dog": "https://www.gbif.org/species/6164210",
-    "tayra": "https://www.gbif.org/species/2433716",
-    "margay": "https://www.gbif.org/species/2434950",
-    "tamandua": "https://www.gbif.org/species/2436340",
-    "opossum_sp": "https://www.gbif.org/species/5455",
-    "giant_wood_rail": "https://www.gbif.org/species/2474657",
-    "aves": "https://www.gbif.org/species/212",
-    "tinamou_sp": "https://www.gbif.org/species/9353",
-    "limpkin": "https://www.gbif.org/species/2474337",
-    "carnivora": "https://www.gbif.org/species/732",
-    "green_cheeked_parakeet": "https://www.gbif.org/species/2479804",
-    "rufescent_tiger_heron": "https://www.gbif.org/species/2480869",
-    "black_vulture": "https://www.gbif.org/species/2481942",
-    "red_necked_woodpecker": "https://www.gbif.org/species/2478573",
-    "rodentia": "https://www.gbif.org/species/1459",
-    "neotropical_otter": "https://www.gbif.org/species/2433738",
-    "white_eared_opossum": "https://www.gbif.org/species/2439930",
-    "giant_anteater": "https://www.gbif.org/species/2436346",
-    "small_billed_tinamou": "https://www.gbif.org/species/2477558",
-    "guan_sp": "https://www.gbif.org/species/5237",
-    "red_footed_tortoise": "https://www.gbif.org/species/9533689",
-    "brazilian_porcupine": "https://www.gbif.org/species/2437600",
-    "tataupa_tinamou": "https://www.gbif.org/species/2477522",
-}
-
 
 _CLASS_LOOKUP = {name.lower(): name for name in CLASS_NAMES}
 
@@ -667,16 +588,11 @@ class OWLv2ModelHelper:
 
         for box, score, label in zip(boxes, scores, labels):
             class_name = _class_from_prompt(str(label))
-            gbif_url = GBIF_IDS.get(class_name, "")
-            if REQUIRE_GBIF_IDS and not gbif_url:
-                continue
-
             mapped.append(
                 {
                     "bbox": [round(float(v), 3) for v in box],
-                    "acceptedNameUsageID": gbif_url,
+                    "class": class_name,
                     "score": float(score),
-                    "className": class_name,
                 }
             )
         return mapped
